@@ -8,22 +8,33 @@
 import UIKit
 
 final class PersonsListViewController: UITableViewController {
-
-    private var personsList = Person.getPerson()
+    
+    var personsList = Person.getPerson()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        if let tabBarControllers = tabBarController?.viewControllers {
+            if let secondNС = tabBarControllers[1] as? UINavigationController,
+               let personsListSectionedVC = secondNС.topViewController as? PersonsListSectionedViewController {
+                personsListSectionedVC.personsList = self.personsList
+            }
+        }
     }
-
-
+    
+    // MARK: - Navigation
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        guard let indexPath = tableView.indexPathForSelectedRow else { return }
+        
+        guard let personDetailsVC = segue.destination as? PersonDetailsViewController else { return }
+        personDetailsVC.person = personsList[indexPath.row]
+    }
 }
-
 
 // MARK: - UITableViewDataSource
 extension PersonsListViewController {
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        2
+        personsList.count
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -34,7 +45,14 @@ extension PersonsListViewController {
         content.text = ("\(person.firstName) \(person.lastName)")
         
         cell.contentConfiguration = content
+        
         return cell
     }
 }
 
+// MARK: - UITableViewDelegate
+extension PersonsListViewController {
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        performSegue(withIdentifier: "showDetails", sender: nil)
+    }
+}

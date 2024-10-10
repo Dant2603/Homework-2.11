@@ -15,18 +15,14 @@
 import UIKit
 
 final class PersonsListSectionedViewController: UITableViewController {
-
-    private var personsList = Person.getPerson()
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
+    var personsList: [Person] = []
         
-    }
-
-// MARK: - Navigation
+    
+    // MARK: - Navigation
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         guard let indexPath = tableView.indexPathForSelectedRow else { return }
-
+        
         guard let personDetailsVC = segue.destination as? PersonDetailsViewController else { return }
         personDetailsVC.person = personsList[indexPath.row]
     }
@@ -34,17 +30,31 @@ final class PersonsListSectionedViewController: UITableViewController {
 }
 
 // MARK: - UITableViewDataSource
-extension PersonsListViewController {
+extension PersonsListSectionedViewController {
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        2
+    }
+    
+    override func numberOfSections(in tableView: UITableView) -> Int {
         personsList.count
     }
     
+    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        "\(personsList[section].firstName) \(personsList[section].lastName)"
+    }
+    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "personCell", for: indexPath)
-        let person = personsList[indexPath.row]
+        let cell = tableView.dequeueReusableCell(withIdentifier: "personSection", for: indexPath)
+        let person = personsList[indexPath.section]
         
         var content = cell.defaultContentConfiguration()
-        content.text = ("\(person.firstName) \(person.lastName)")
+        if indexPath.row == 0 {
+            content.text = "\(person.phoneNumber)"
+            content.image = UIImage(systemName: "phone")
+        } else if indexPath.row == 1 {
+            content.text = "\(person.email)"
+            content.image = UIImage(systemName: "envelope")
+        }
         
         cell.contentConfiguration = content
         
@@ -53,9 +63,8 @@ extension PersonsListViewController {
 }
 
 // MARK: - UITableViewDelegate
-extension PersonsListViewController {
+extension PersonsListSectionedViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         performSegue(withIdentifier: "showDetails", sender: nil)
     }
 }
-
